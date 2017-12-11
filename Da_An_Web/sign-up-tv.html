@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>HOME SHOPPE</title>
+<!-- custom-theme -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/x-javascript"> 
+	addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false);
+	function hideURLbar(){ window.scrollTo(0,1); } 
+</script>
+<!-- //custom-theme -->
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+<script language="javascript">// mấy cái hàm ở trên này  nà
+	<!-- //kiểm tra số sdt -->
+		function ktsdt(){
+			var sodt    = $.trim($('#phone').val());
+			var flag = true;
+			if(sodt.length<10){	 
+				$('#phone').focus();
+				$('#sdt_error').text('Số ĐT phải từ 10 đến 11 ký tự');
+				flag=false;
+			}	 
+			else{
+				$('#sdt_error').text("");
+
+			} 
+			return flag; 
+		} 
+		function isNumberKey(evt){
+			var charCode = (evt.which) ? evt.which : event.keyCode;
+			if(charCode == 59 || charCode == 46)
+			   	return true;
+			if (charCode > 31 && (charCode < 48 || charCode > 57))
+				  	return false;
+			return true;
+		}
+	<!-- //end KT -->
+	<!-- //kiểm tra email -->
+		function ktmail(){
+			var flag = true;
+			var em=$.trim($('#email').val());
+			if(em.indexOf("@")==-1 || em.indexOf(".")==-1 || em.indexOf("@")!=em.lastIndexOf("@")|| em.lastIndexOf(".")==em.length-1|| em.indexOf(".")==-1||em.lastIndexOf(".")<em.indexOf("@")){
+				$('#email').focus();
+				$('#email_error').text('Email sai định dạng');
+				 flag=false;
+			}
+			else
+				$('#email_error').text(" ");
+			return flag;
+		}// mấy hàm này nà
+	<!-- //end KT -->
+	<!-- //kiểm tra user -->
+		function ktten(){
+			var ten    = $.trim($('#username').val());
+			var flag = true;
+			if(ten=='' || ten.length<3){	 
+				$('#username').focus();
+				$('#username_error').text('Họ tên không hợp lệ');
+				flag=false;
+			}	 
+			else 
+				$('#username_error').text(" ");
+
+			return flag; 
+		}
+	<!-- //end KT -->
+	<!-- // Kiểm tra pass -->
+		function ktpass(){
+			var pass    = $.trim($('#password1').val());
+			var flag = true;
+			if(pass=='' || pass.length<4){	 
+				$('#password1').focus();
+				$('#pass_error').text('Password không hợp lệ');
+				flag=false;
+			}	 
+			else 
+				$('#pass_error').text(" ");
+
+			return flag; 
+		}
+	<!-- //end KT -->
+	<!-- // Kiểm tra repass -->
+		function ktRepass(){
+			var pass2    = $.trim($('#password2').val());
+			var pass1 =$.trim($('#password1').val());
+			var flag = true;
+			if(pass2!=pass1){	 
+				$('#password2').focus();
+				$('#repass_error').text('Password không hợp lệ');
+				flag=false;
+			}	 
+			else 
+				$('#repass_error').text(" ");
+
+			return flag; 
+		}
+	<!-- //end KT -->
+	<!-- // Kiểm tra trùng -->
+		function checkSDT(){
+			if (ktsdt()) {
+				$.post('KTTrung.php', {'phone': $("#phone").val(),'check':'phone'}, function(data){
+		            if(data=="true"){ 
+		            	$("#sdt_error").text("Số ĐT đã tồn tại. Mời bạn nhập lại số khác");
+		            	$("#submit").attr({
+		            		"disabled": ''
+		            	});
+		            }
+		            else{
+		            	$("#sdt_error").text("");
+		            	$("#submit").removeAttr("disabled");
+		            	/*$("#TB").removeClass("TB_SDT");*/
+		            }
+            	});
+			}
+        }
+        
+        function checkEmail(){
+        	if (ktmail()) {
+        		$.post('KTTrung.php', {'email': $("#email").val(),'check':'email'}, function(data){
+		            if(data=="true"){ 
+		            	$("#email_error").text("Email đã tồn tại. Mời bạn nhập lại Email khác");
+		            	$("#submit").attr({
+		            		"disabled": ''
+		            	});
+		            	 /*$('#TB').addClass ("TB_SDT");*/
+		            }
+		            else{
+		            	$("#email_error").text("");
+		            	$("#submit").removeAttr("disabled");
+		            	/*$("#TB").removeClass("TB_SDT");*/
+		            }
+            	});
+        	}
+        }
+	<!-- //end KT -->
+	<!-- //Hàm gửi dữ liệu đk -->
+		function Load(){
+			var data = {
+					name: $("#username").val(),
+					email: $("#email").val(),
+					password: $("#password2").val(),
+					phone: $("#phone").val(),
+				}
+				console.log(data);
+			if (KtLoi()== true) {
+				$.ajax({
+				url : "sign-up-xuly.php",
+				type : "POST",
+				dataType:"text",
+				data : {
+					name: $("#username").val(),
+					email: $("#email").val(),
+					password: $("#password2").val(),
+					phone: $("#phone").val(),
+				},
+				cache: false,
+			}).done(function(ketqua) {
+		        	/*console.log(ketqua);*/
+		        	if($.trim(ketqua)!="false"){
+			            $("#TB").text("Đã đăng ký thành công").fadeIn().delay(2000).fadeOut();
+			        }
+			        else{
+			            	$("#TB").text("Đăng Ký thất bại").fadeIn().delay(2000).fadeOut();	
+			        }
+		            return true;
+		    });
+			}
+			else {
+				alert("data invalid!")
+			}
+			
+		}
+	<!-- //Hàm gửi dữ liệu đk -->
+	<!-- //Kt lỗi, nếu có lỗi không cho submit -->
+		function KtLoi(){ // nay ha ?
+			$phone = ktsdt();
+			$mail =ktmail();
+			$name =ktten();
+			$pass1= ktpass();
+			$pass2=ktRepass();
+			flag=true;
+			if($phone=="false"||$mail=="false"||$name=="false"||$pass1=="false"||$pass2=="false"){
+				$("#submit").attr({
+	            		"disabled": ''
+	            	});
+				flag=false;
+			}
+			else{
+				$("#submit").removeAttr("disabled");
+				flag=true;
+			}
+			return flag;
+		}
+	<!-- //Kt lỗi, nếu có lỗi không cho submit -->
+	$(document).ready(function(){
+		$('#submit').click(function(){
+	        $('#username').val(''),
+			$('#email').val(''),
+			$('#password2').val(''),
+			$('#phone').val(''),
+			$('#password1').val('')
+	    });
+ });
+
+</script>
+<link href="css/style1.css" rel="stylesheet" type="text/css" media="all" />
+<link href="css/popuo-box.css" rel="stylesheet" type="text/css" media="all" />
+<link href="//fonts.googleapis.com/css?family=Federo" rel="stylesheet">
+<link href="//fonts.googleapis.com/css?family=Alegreya+Sans+SC:100,100i,300,400,400i,500,500i,700,700i,800,800i,900,900i" rel="stylesheet">
+</head>
+<body>
+
+	<div class="bg" >
+		<div class="center-container">
+		<h1 class="agile-head text-center">Home Shoppe</h1>
+		<div class="container">
+			<div class="form_w3layouts">
+				<div class="w3layouts-title">
+					<h2 class="w3ls-left">create an account</h2>
+					<a class="w3_play_icon1" href="#small-dialog1">sign in</a>
+				<div class="clear"></div>
+				</div>
+				<div class="w3_agile_login" id="form">
+				  	<p>Your Name</p>
+					<input type="text" name="username" id="username" placeholder="Your Username" onchange="ktten()" />
+					<span id="username_error"></span>
+					<p>Email</p>
+					<input type="email" name="email" id="email"  placeholder="Email" onblur="checkEmail(this.value)" />
+					<span id="email_error"></span>
+					<p>Password</p>
+					<input type="password" name="Password" id="password1" placeholder="Password" onchange="ktpass()" />
+					<span id="pass_error"></span>
+					<p>Repeat Password</p>
+					<input type="password" name="repeatpass" id="password2" placeholder="Repeat Password" onchange="ktRepass()" />
+					<span id="repass_error"></span>
+					<p>Phone</p>
+					<input type="text" name="sdt" id="phone" placeholder="Phone number" onkeypress="return isNumberKey(event);" maxlength="11" onblur="checkSDT(this.value)">
+					<span id="sdt_error" ></span>
+					<div class="w3_agile_login">
+						<input type="submit" id="submit" value="Sign up" onclick="Load()" onchange="KtLoi()"> 
+						<span id="TB"></span>
+					</div> 
+				</div> 
+			</div>			
+		</div>
+		<div id="small-dialog1" class="mfp-hide">
+				<div class="contact-form1">
+						<h3 class="w3ls-left">sign in </h3>
+						<form action="login.php" method="post" class="w3_agile_login">
+							<p>Email</p>
+							<input type="email" id="email" name="email" class="email" placeholder="your mail" required="">
+							 <p>Password</p>
+							<input type="password" id="password" name="password" class="password" placeholder="your password" required="">
+							<div class="w3_agile_login">
+								<input type="submit" name="submit" value="sign in">
+							</div>
+						</form>
+				</div>	
+		</div>
+		<div class="agileits-w3layouts-copyright text-center">
+			
+		</div>	
+	</div>	
+	</div>
+	<!-- pop-up-box -->  
+		<script src="js/jquery.magnific-popup.js" type="text/javascript"></script>
+	<!--//pop-up-box -->
+	<script>
+		$(document).ready(function() {
+		$('.w3_play_icon,.w3_play_icon1,.w3_play_icon2').magnificPopup({
+			type: 'inline',
+			fixedContentPos: false,
+			fixedBgPos: true,
+			overflowY: 'auto',
+			closeBtnInside: true,
+			preloader: false,
+			midClick: true,
+			removalDelay: 300,
+			mainClass: 'my-mfp-zoom-in'
+		});														
+		});
+	</script>
+	<script src="js/jquery.vide.min.js"></script>
+</body>
+</html>
+
